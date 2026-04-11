@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="eco_cycle">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>eco_cycle</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script>
+    (function () {
+      let model = null;
+      let labels = [];
+
+      async function ensureModelLoaded() {
+        if (model) {
+          return;
+        }
+
+        const roots = ['assets/asset/for web', 'assets/asset/for_web'];
+        let lastError = null;
+
+        for (const root of roots) {
+          const modelUrl = new URL(`${root}/model.json`, window.location.href).toString();
+          const metadataUrl = new URL(`${root}/metadata.json`, window.location.href).toString();
+
+          try {
+            const loadedModel = await tf.loadLayersModel(modelUrl);
+            const metadata = await fetch(metadataUrl).then((response) => response.json());
+            model = loadedModel;
+            labels = Array.isArray(metadata.labels) ? metadata.labels : [];
+            return;
+          } catch (error) {
+            lastError = error;
+          }
+        }
+
+        throw lastError ?? new Error('Could not load any web model path.');
+      }
+
+      window.ecoCycleLoadModel = async function () {
+        await ensureModelLoaded();
+      };
+
+      window.ecoCycleGetLabels = async function () {
+        await ensureModelLoaded();
+        return labels.join('||');
+      };
+
+      window.ecoCycleClassifyImageBytes = async function (imageBytes) {
+        await ensureModelLoaded();
+
+        const blob = new Blob([new Uint8Array(imageBytes)], { type: 'image/*' });
+        const objectUrl = URL.createObjectURL(blob);
+
+        try {
+          const imageElement = await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = objectUrl;
+          });
+
+          const logits = tf.tidy(() => {
+            const input = tf.browser
+              .fromPixels(imageElement)
+              .resizeBilinear([224, 224])
+              .toFloat()
+              .div(255)
+              .expandDims(0);
+
+            return model.predict(input);
+          });
+
+          const values = await logits.data();
+          logits.dispose();
+
+          return JSON.stringify(Array.from(values));
+        } finally {
+          URL.revokeObjectURL(objectUrl);
+        }
+      };
+    })();
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

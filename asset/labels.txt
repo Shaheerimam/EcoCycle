@@ -1,0 +1,4 @@
+0 Recyclable
+1 Hazardous
+2 Organic
+3 E-waste
