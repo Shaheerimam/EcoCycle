@@ -4,42 +4,92 @@
 *.pyc
 *.swp
 .DS_Store
-.atom/
-# .build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+.Trashes
+*.orig
+*.rej
+*.lock
+*.tmp
+*~
 
-# IntelliJ related
+# IDEs and editors
 *.iml
 *.ipr
 *.iws
 .idea/
+.vscode/
+*.vscode/
+/.history/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# Flutter / Dart
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
+# pubspec.lock can be committed for app dependency locking,
+# but the package cache and generated Dart tool files are not needed.
+
+# Build outputs
 /build/
-/coverage/
+**/build/
+**/Generated.xcconfig
+**/Flutter/ephemeral/
+**/Flutter/Flutter.framework
+**/Flutter/Flutter.podspec
+**/Flutter/engine/Flutter.framework
 
-# Symbolication related
-app.*.symbols
+# Android build
+/android/.gradle/
+/android/app/build/
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+/android/local.properties
 
-# Obfuscation related
-app.*.map.json
+# iOS build
+/ios/Pods/
+/ios/.symlinks/
+/ios/Flutter/Flutter.framework/
+/ios/Flutter/Flutter.podspec
+/ios/ServiceDefinitions.json
+/ios/Runner.xcworkspace/
+/ios/Podfile.lock
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# macOS build
+/macos/Pods/
+/macos/Flutter/Flutter.framework/
+/macos/Flutter/Flutter.podspec
+/macos/Runner.xcworkspace/
+
+# Web build files
+/web/.dart_tool/
+/web/build/
+
+# Generated files
+**/generated_plugin_registrant.dart
+**/generated_plugin_registrant.h
+**/generated_plugin_registrant.m
+**/GeneratedPluginRegistrant.java
+**/GeneratedPluginRegistrant.h
+**/GeneratedPluginRegistrant.m
+
+# Logs
+*.log
+
+# Crash reports
+crash_*.log
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+
+# Misc assets
+*.keystore
+*.jks
+
+# Local configuration
+pubspec.lock
+
+# Uncomment the next line if you generate coverage reports locally
+# coverage/
