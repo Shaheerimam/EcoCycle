@@ -10,7 +10,7 @@ Eco Cycle is a Flutter-powered waste classification and community rewards app. I
 
 - Android download: `https://drive.google.com/file/d/1uzWW7nB5sBuEhBOWlzGejaeuJATRPyBY/view?usp=sharing`
 
-  _(Replace this link with your published app store or APK URL.)_
+  
 
 ## Key Features
 
@@ -61,6 +61,4 @@ Eco Cycle is a Flutter-powered waste classification and community rewards app. I
 - Ensure `pubspec.yaml` includes the asset declarations for model and image files
 - Replace the app download placeholder with your actual published link
 
-## License
 
-This project is provided as-is. Update the license information as needed for your repository.
