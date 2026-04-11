@@ -55,10 +55,6 @@ Eco Cycle is a Flutter-powered waste classification and community rewards app. I
    flutter run
    ```
 
-## Notes
 
-- Update `lib/main.dart` with your Supabase project URL and anon key
-- Ensure `pubspec.yaml` includes the asset declarations for model and image files
-- Replace the app download placeholder with your actual published link
 
 
