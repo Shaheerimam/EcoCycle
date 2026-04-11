@@ -623,25 +623,39 @@ class _TopBar extends StatelessWidget {
         ? 'asset/images/icons/wlogo_white.png'
         : 'asset/images/icons/wlogo_black.png';
 
-    return Row(
-      children: [
-        Image.asset(logoAsset, width: 150, height: 150, fit: BoxFit.contain),
-        const SizedBox(width: 12),
-        if (showResult)
-          _DemoToggle(
-            icon: highConf
-                ? Icons.check_circle_outline
-                : Icons.warning_amber_rounded,
-            tooltip: highConf ? 'High confidence' : 'Needs review',
-            isActive: !highConf,
-            accentColor: Colors.amber,
-            onTap: onPickImage,
-          ),
-        const Spacer(),
-        _StatPill(label: 'Points', value: pointsValue),
-        const SizedBox(width: 10),
-        _StatPill(label: 'Rank', value: rankValue),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final logoSize = constraints.maxWidth < 520
+            ? 80.0
+            : constraints.maxWidth < 840
+            ? 100.0
+            : 150.0;
+
+        return Row(
+          children: [
+            SizedBox(
+              width: logoSize,
+              height: logoSize,
+              child: Image.asset(logoAsset, fit: BoxFit.contain),
+            ),
+            const SizedBox(width: 12),
+            if (showResult)
+              _DemoToggle(
+                icon: highConf
+                    ? Icons.check_circle_outline
+                    : Icons.warning_amber_rounded,
+                tooltip: highConf ? 'High confidence' : 'Needs review',
+                isActive: !highConf,
+                accentColor: Colors.amber,
+                onTap: onPickImage,
+              ),
+            const Spacer(),
+            _StatPill(label: 'Points', value: pointsValue),
+            const SizedBox(width: 10),
+            _StatPill(label: 'Rank', value: rankValue),
+          ],
+        );
+      },
     );
   }
 }

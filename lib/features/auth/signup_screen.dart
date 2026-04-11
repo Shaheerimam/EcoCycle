@@ -135,6 +135,7 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       );
     } on AuthException catch (error) {
+      print(error);
       if (!mounted) {
         return;
       }
@@ -144,6 +145,7 @@ class _SignupScreenState extends State<SignupScreen> {
       ).showSnackBar(SnackBar(content: Text(_friendlyAuthMessage(error))));
     } on PostgrestException catch (error) {
       if (!mounted) {
+        print(error);
         return;
       }
 
@@ -155,6 +157,7 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       );
     } catch (error) {
+      print(error);
       if (!mounted) {
         return;
       }
