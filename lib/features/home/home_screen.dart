@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -257,7 +258,11 @@ class _HomeScreenState extends State<HomeScreen>
     final confirmed = prediction.confidence >= 0.8;
     final pointsAwarded = confirmed ? 10 : 0;
     final carbonDelta = confirmed ? 0.3 : 0.0;
-    final category = confirmed ? 'Recyclable' : 'Needs Review';
+    final category = confirmed
+        ? prediction.label.contains('Organic')
+              ? 'Organic'
+              : 'Recyclable'
+        : 'Needs Review';
     final previousClassificationCount = _classificationCount;
 
     // Optimistic UI update so the user immediately sees the scan.
@@ -272,39 +277,58 @@ class _HomeScreenState extends State<HomeScreen>
     );
 
     try {
-      await Supabase.instance.client.from('user_scans').insert({
-        'user_id': user.id,
-        'item_name': prediction.label,
-        'category_label': category,
-        'confidence': prediction.confidence,
-        'points_awarded': pointsAwarded,
-        'confirmed': confirmed,
-      });
+      if (confirmed) {
+        // High confidence: save directly to user_scans
+        await Supabase.instance.client.from('user_scans').insert({
+          'user_id': user.id,
+          'item_name': prediction.label,
+          'category_label': category,
+          'confidence': prediction.confidence,
+          'points_awarded': pointsAwarded,
+          'confirmed': confirmed,
+        });
 
-      await Supabase.instance.client.from('user_activity_days').upsert({
-        'user_id': user.id,
-        'activity_date': DateTime.now()
-            .toUtc()
-            .toIso8601String()
-            .split('T')
-            .first,
-        'activities_count': 1,
-        'last_activity_at': DateTime.now().toUtc().toIso8601String(),
-      }, onConflict: 'user_id,activity_date');
+        await Supabase.instance.client.from('user_activity_days').upsert({
+          'user_id': user.id,
+          'activity_date': DateTime.now()
+              .toUtc()
+              .toIso8601String()
+              .split('T')
+              .first,
+          'activities_count': 1,
+          'last_activity_at': DateTime.now().toUtc().toIso8601String(),
+        }, onConflict: 'user_id,activity_date');
 
-      await Supabase.instance.client.rpc(
-        'refresh_user_streak',
-        params: {'p_user_id': user.id},
-      );
+        await Supabase.instance.client.rpc(
+          'refresh_user_streak',
+          params: {'p_user_id': user.id},
+        );
 
-      await Supabase.instance.client
-          .from('user_profiles')
-          .update({
-            'classification_count': previousClassificationCount + 1,
-            'total_points': _totalPoints + pointsAwarded,
-            'carbon_saved_kg': _carbonSavedKg + carbonDelta,
-          })
-          .eq('id', user.id);
+        await Supabase.instance.client
+            .from('user_profiles')
+            .update({
+              'classification_count': previousClassificationCount + 1,
+              'total_points': _totalPoints + pointsAwarded,
+              'carbon_saved_kg': _carbonSavedKg + carbonDelta,
+            })
+            .eq('id', user.id);
+      } else {
+        // Low confidence: save to pending_disputes for moderator review
+        // Convert image bytes to base64 for storage
+        final imageBase64 = _selectedImageBytes != null
+            ? 'data:image/jpeg;base64,${base64Encode(_selectedImageBytes!)}'
+            : null;
+
+        await Supabase.instance.client.from('pending_disputes').insert({
+          'user_id': user.id,
+          'item_name': prediction.label,
+          'category_label': prediction.label.contains('Organic')
+              ? 'Organic'
+              : 'Recyclable',
+          'confidence': prediction.confidence,
+          'image_data': imageBase64,
+        });
+      }
 
       await _loadDashboardData();
     } catch (error) {
@@ -594,15 +618,15 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final logoAsset = isDark
+        ? 'asset/images/icons/wlogo_white.png'
+        : 'asset/images/icons/wlogo_black.png';
+
     return Row(
       children: [
-        _DemoToggle(
-          icon: Icons.add_a_photo_outlined,
-          tooltip: isBusy ? 'Please wait...' : 'Capture or upload image',
-          isActive: showResult || isBusy,
-          onTap: onPickImage,
-        ),
-        const SizedBox(width: 6),
+        Image.asset(logoAsset, width: 150, height: 150, fit: BoxFit.contain),
+        const SizedBox(width: 12),
         if (showResult)
           _DemoToggle(
             icon: highConf

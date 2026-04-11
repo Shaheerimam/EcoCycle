@@ -72,6 +72,8 @@ flutter:
     - asset/for_web/model.json
     - asset/for_web/metadata.json
     - asset/for_web/weights.bin
+    - asset/images/icons/wlogo_black.png
+    - asset/images/icons/wlogo_white.png
     - asset/images/
 
 
