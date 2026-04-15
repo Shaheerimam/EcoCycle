@@ -262,9 +262,7 @@ The project is configured for development in VS Code with:
 - Android/iOS development environment
 - 200 MB free disk space
 
-## License
 
-This project was developed as part of software development coursework.
 
 ---
 
